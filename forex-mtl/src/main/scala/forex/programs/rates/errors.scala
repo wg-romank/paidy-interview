@@ -1,17 +1,14 @@
 package forex.programs.rates
 
-import forex.services.rates.errors.{ Error => RatesServiceError }
+import forex.domain.Rate.Pair
+import forex.domain.Timestamp
 
 object errors {
 
   sealed trait Error extends Exception
   object Error {
-    final case class RateLookupFailed(msg: String) extends Error
+    final case class RateNotInCache(pair: Pair, now: Timestamp) extends Error
+    final case class RateExpired(lastUpdated: Timestamp, now: Timestamp) extends Error
   }
 
-  def toProgramError(error: RatesServiceError): Error = error match {
-    case RatesServiceError.OneFrameLookupFailed(msg) => Error.RateLookupFailed(msg)
-    case RatesServiceError.OneFrameMalformedResponse(reason) =>
-      Error.RateLookupFailed(s"malformed service response $reason")
-  }
 }

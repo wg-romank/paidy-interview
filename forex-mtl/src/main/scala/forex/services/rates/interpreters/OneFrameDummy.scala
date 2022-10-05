@@ -2,14 +2,18 @@ package forex.services.rates.interpreters
 
 import forex.services.rates.Algebra
 import cats.Applicative
-import cats.syntax.applicative._
-import cats.syntax.either._
-import forex.domain.{ Price, Rate, Timestamp }
+import cats.implicits._
+import forex.domain.{Price, Rate}
 import forex.services.rates.errors._
+import forex.services.time.ServiceTime
 
-class OneFrameDummy[F[_]: Applicative] extends Algebra[F] {
+class OneFrameDummy[F[_]: Applicative: ServiceTime] extends Algebra[F] {
 
-  override def get(pair: Rate.Pair): F[Error Either Rate] =
-    Rate(pair, Price(BigDecimal(100)), Timestamp.now).asRight[Error].pure[F]
+  override def get(pairs: List[Rate.Pair]): F[Error Either List[Rate]] =
+    for {
+      now <- ServiceTime[F].now
+    } yield pairs.map {
+      pair => Rate(pair, Price(BigDecimal(100)), now)
+    }.asRight[Error]
 
 }

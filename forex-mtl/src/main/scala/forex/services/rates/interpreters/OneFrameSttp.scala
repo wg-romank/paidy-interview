@@ -35,19 +35,24 @@ object ResponseRate {
 }
 
 class OneFrameSttp[F[_]: Sync](backend: SttpBackend[F, _], oneFrameConfig: OneFrameConfig) extends Algebra[F] {
-  private def mkRequest(pair: Pair) =
+  private def mkRequest(pairs: List[Pair]) = {
+    val uri = pairs.foldLeft(uri"http://${oneFrameConfig.address}/rates") {
+      case (acc, p) => acc.addParam("pair", p.show)
+    }
+
     basicRequest
       .header("token", oneFrameConfig.token)
-      .get(uri"http://${oneFrameConfig.address}/rates?pair=${pair.from}${pair.to}")
+      .get(uri)
+  }
 
-  override def get(pair: Rate.Pair): F[Either[errors.Error, Rate]] = {
+  override def get(pairs: List[Rate.Pair]): F[errors.Error Either List[Rate]] = {
     for {
-      raw <- backend.send(mkRequest(pair))
+      raw <- backend.send(mkRequest(pairs))
     } yield for {
       bodyRaw <- raw.body.left
         .map(errors.Error.OneFrameLookupFailed.apply)
       decoded <- decode[List[ResponseRate]](bodyRaw).left
         .map(errors.Error.OneFrameMalformedResponse.apply)
-    } yield decoded(0).toRate
+    } yield decoded.map(_.toRate)
   }
 }

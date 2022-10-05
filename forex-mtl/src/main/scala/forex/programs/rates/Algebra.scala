@@ -1,8 +1,9 @@
 package forex.programs.rates
 
-import forex.domain.Rate
+import forex.domain.{Rate, Timestamp}
 import errors._
+import forex.domain.Rate.Pair
 
 trait Algebra[F[_]] {
-  def get(request: Protocol.GetRatesRequest): F[Error Either Rate]
+  def get(now: Timestamp, pair: Pair): F[Error Either Rate]
 }

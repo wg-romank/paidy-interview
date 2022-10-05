@@ -2,9 +2,14 @@ package forex.domain
 
 import java.time.OffsetDateTime
 
-case class Timestamp(value: OffsetDateTime) extends AnyVal
+import scala.concurrent.duration.FiniteDuration
+
+case class Timestamp(value: OffsetDateTime) {
+  def +(other: FiniteDuration): Timestamp =
+    Timestamp(value.plus(other.length, other.unit.toChronoUnit))
+}
 
 object Timestamp {
-  def now: Timestamp =
-    Timestamp(OffsetDateTime.now)
+  implicit val ordering: Ordering[Timestamp] =
+    (x: Timestamp, y: Timestamp) => x.value.compareTo(y.value)
 }

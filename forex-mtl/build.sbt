@@ -69,3 +69,5 @@ libraryDependencies ++= Seq(
   Libraries.scalaCheck       % Test,
   Libraries.catsScalaCheck   % Test
 )
+
+addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")

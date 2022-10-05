@@ -15,6 +15,9 @@ object Currency {
   case object SGD extends Currency
   case object USD extends Currency
 
+  // todo: maybe shapeless can do its magic here
+  val all = List(AUD, CAD, CHF, EUR, GBP, NZD, JPY, SGD, USD)
+
   implicit val show: Show[Currency] = Show.show {
     case AUD => "AUD"
     case CAD => "CAD"
